@@ -21,4 +21,9 @@ public class FuelEntry {
         this.odometer = odometer;
         this.timestamp = LocalDateTime.now();
     }
+
+    public void setId(long andIncrement) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setId'");
+    }
 }
