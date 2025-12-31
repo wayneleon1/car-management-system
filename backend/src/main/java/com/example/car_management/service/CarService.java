@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Service // This is like a singleton service in Angular/React
+@Service
 public class CarService {
     private final Map<Long, Car> cars = new HashMap<>();
     private final AtomicLong idCounter = new AtomicLong(1);
