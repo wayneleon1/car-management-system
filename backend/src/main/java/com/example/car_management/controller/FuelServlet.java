@@ -7,11 +7,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import java.io.IOException;
 import java.util.Map;
 
-@WebServlet("/servlet/fuel-stats") // Maps to URL like Express app.get()
+@WebServlet(urlPatterns = "/servlet/fuel-stats", name = "FuelServlet")
 public class FuelServlet extends HttpServlet {
 
     @Autowired
@@ -20,25 +21,35 @@ public class FuelServlet extends HttpServlet {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
+    public void init() {
+        // This enables Spring dependency injection in the Servlet
+        SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
+    }
+
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
 
-        // Manually parse query parameter (like req.query in Express)
+        System.out.println("Servlet called! Query string: " + req.getQueryString());
+
+        // Manually parse query parameter
         String carIdParam = req.getParameter("carId");
 
         if (carIdParam == null || carIdParam.isEmpty()) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST); // 400
-            resp.setContentType("application/json");
-            resp.getWriter().write("{\"error\": \"carId parameter is required\"}");
+            sendError(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    "{\"error\": \"carId parameter is required\"}");
             return;
         }
 
         try {
             Long carId = Long.parseLong(carIdParam);
+            System.out.println("Getting stats for carId: " + carId);
+
             Map<String, Object> stats = fuelService.getFuelStatistics(carId);
+            System.out.println("Stats: " + stats);
 
             // Set response headers manually
-            resp.setStatus(HttpServletResponse.SC_OK); // 200
+            resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
 
@@ -46,9 +57,19 @@ public class FuelServlet extends HttpServlet {
             objectMapper.writeValue(resp.getWriter(), stats);
 
         } catch (NumberFormatException e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST); // 400
-            resp.setContentType("application/json");
-            resp.getWriter().write("{\"error\": \"Invalid carId format\"}");
+            sendError(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    "{\"error\": \"Invalid carId format\"}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "{\"error\": \"Internal server error: " + e.getMessage() + "\"}");
         }
+    }
+
+    private void sendError(HttpServletResponse resp, int status, String message)
+            throws IOException {
+        resp.setStatus(status);
+        resp.setContentType("application/json");
+        resp.getWriter().write(message);
     }
 }

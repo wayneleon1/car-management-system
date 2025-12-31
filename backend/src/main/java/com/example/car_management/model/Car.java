@@ -20,7 +20,7 @@ public class Car {
         this.year = year;
     }
 
-    // Getters and Setters (like getters/setters in JavaScript)
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -37,4 +37,32 @@ public class Car {
         this.brand = brand;
     }
 
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public List<FuelEntry> getFuelEntries() {
+        return fuelEntries;
+    }
+
+    public void setFuelEntries(List<FuelEntry> fuelEntries) {
+        this.fuelEntries = fuelEntries;
+    }
+
+    @Override
+    public String toString() {
+        return "Car{id=" + id + ", brand='" + brand + "', model='" + model + "', year=" + year + "}";
+    }
 }
